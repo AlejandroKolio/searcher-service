@@ -1,4 +1,4 @@
-### Searcher Service
+### Searcher Service based on Spring 5/Project Reactor.
 
 Is a service, that will accept a request with text parameter on input.
 
