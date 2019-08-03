@@ -5,6 +5,9 @@ import lombok.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+/**
+ * @author Alexander Shakhov
+ */
 @Component
 @AllArgsConstructor
 public class ErrorResponseFactory {

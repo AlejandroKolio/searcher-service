@@ -1,0 +1,105 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0-SNAPSHOT
+  title: Searcher Service
+servers:
+  - url: http://localhost:8080/v1/api
+paths:
+
+  /search/artist:
+    get:
+      summary: Get merged list of Artist Albums and Books
+      parameters:
+        - $ref: "#/components/parameters/artist"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        '200':
+          description: Artist response with top books and albums
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _embedded:
+                    type: object
+                    properties:
+                      content:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Artist"
+        400:
+          description: |
+            - code 100
+              - Description: request is invalid
+            - code 101
+              - Description: resourse not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        5XX:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  parameters:
+    artist:
+      name: name
+      in: query
+      description: artist's name or phrase
+      required: true
+      schema:
+        type: string
+    limit:
+      name: limit
+      in: query
+      description: limit the request (default size is 5)
+      required: false
+      schema:
+        type: integer
+  schemas:
+    Artist:
+      properties:
+        book:
+          type: object
+          description: top limited books
+          $ref: "#/components/schemas/Book"
+        album:
+          type: object
+          description: top limited albums
+          $ref: "#/components/schemas/Album"
+    Album:
+      properties:
+        albumId:
+          type: string
+          description: friendly id of concrete album
+        albumTitle:
+          type: string
+          description: name of the album
+    Book:
+      properties:
+        bookId:
+          type: string
+          description: friendly id of concrete book
+        bookTitle:
+          type: string
+          description: name of the book
+    Error:
+      required:
+        - id
+        - status
+        - code
+        - message
+      properties:
+        id:
+          type: string
+        status:
+          type: integer
+          format: int32
+        code:
+          type: string
+        message:
+          type: string

@@ -1,39 +1,54 @@
 package com.task.searcherservice.service;
 
-import com.task.searcherservice.dto.Artist;
+import com.task.searcherservice.client.AppleClient;
+import com.task.searcherservice.client.GoogleClient;
+import com.task.searcherservice.dto.Album;
+import com.task.searcherservice.dto.Book;
+import java.time.Duration;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * @author Alexander Shakhov
  */
 @Service
 @RequiredArgsConstructor
-@PropertySource("classpath:queries.properties")
 public class ArtistService {
 
-    @Value("${google.query}")
-    private String booksUri;
-    @Value("${itunes.query}")
-    private String albumUri;
     @NonNull
-    private final WebClient.Builder webClient;
+    private final GoogleClient googleClient;
+    @NonNull
+    private final AppleClient appleClient;
+    @NonNull
+    private final AlbumService albumService;
+    @NonNull
+    private final BookService bookService;
 
-    public List<Artist> getTopBooksAndAlbums(@NonNull String input) {
-        final String body = webClient.build()
-                .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path(booksUri).queryParam("q", input).build())
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
-        return null;
+    public Flux<List<?>> getTopBooksAndAlbums(@NonNull String input, @Nullable Integer limit) {
+        return Flux.merge(monoAlbums(input, limit), monoBooks(input, limit));
+    }
+
+    private Mono<List<Album>> monoAlbums(@NonNull String input, @Nullable Integer limit) {
+        return appleClient.getData(input)
+                .map(str -> albumService.getTopAlbums(str, limit))
+                .onErrorResume(error -> Mono.empty())
+                .take(Duration.ofSeconds(10))
+                .log()
+                .subscribeOn(Schedulers.elastic());
+    }
+
+    private Mono<List<Book>> monoBooks(@NonNull String input, @Nullable Integer limit) {
+        return googleClient.getData(input)
+                .map(str -> bookService.getTopBooks(str, limit))
+                .onErrorResume(error -> Mono.empty())
+                .take(Duration.ofSeconds(10))
+                .log()
+                .subscribeOn(Schedulers.elastic());
     }
 }

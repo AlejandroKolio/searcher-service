@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
+/**
+ * @author Alexander Shakhov
+ */
 @Slf4j
 @Component
 @AllArgsConstructor
@@ -27,6 +30,7 @@ public class DefaultExceptionResolver implements HandlerExceptionResolver {
     public ModelAndView resolveException(@NonNull final HttpServletRequest request,
         @NonNull final HttpServletResponse response, @Nullable final Object handler,
         @NonNull final Exception exception) {
+
         final ErrorCodes code = ErrorCodes.API_CLIENT_ERROR;
 
         final ErrorResponse errorResponse = errorResponseFactory.create(code.getStatus(), code, "Server Error");

@@ -4,6 +4,7 @@ import lombok.NonNull;
 
 /**
  * Base form of runtime exception, adds convenient formatting.
+ * @author Alexander Shakhov
  */
 public abstract class AbstractFormattedException extends RuntimeException {
     private static final long serialVersionUID = 1L;

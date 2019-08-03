@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.springframework.http.HttpStatus;
 
+/**
+ * @author Alexander Shakhov
+ */
 @Getter
 public enum ErrorCodes {
     BAD_REQUEST_FORMAT(HttpStatus.BAD_REQUEST, "100"),

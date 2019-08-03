@@ -2,15 +2,14 @@ package com.task.searcherservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
+ * Base enityt for both books and albums requests.
  * @author Alexander Shakhov
  */
-@Data
-@AllArgsConstructor
+@Getter
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SearchResponse {

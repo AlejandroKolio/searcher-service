@@ -11,6 +11,7 @@ import lombok.ToString;
 
 /**
  * General DTO for error response.
+ * @author Alexander Shakhov
  */
 @Getter
 @Setter
@@ -20,7 +21,7 @@ import lombok.ToString;
 public class ErrorResponse {
     private final String id = FriendlyId.createFriendlyId();
     @NonNull
-    private final int status;
+    private final Integer status;
     @NonNull
     private final String code;
     @NonNull
