@@ -1,7 +1,12 @@
 openapi: "3.0.0"
 info:
-  version: 1.0.0-SNAPSHOT
+  version: 0.0.1-SNAPSHOT
   title: Searcher Service
+  description: This is a service for serching top limited artist's books and albums.
+  contact:
+    name: Alexander Shakhov
+    email: write.me.messages@gmail.com
+    url: https://github.com/AlejandroKolio/searcher-service
 servers:
   - url: http://localhost:8080/v1/api
 paths:
