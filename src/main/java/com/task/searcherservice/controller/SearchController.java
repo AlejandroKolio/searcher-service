@@ -28,11 +28,11 @@ public class SearchController {
 
     /**
      * Endpoint to search for both books and albums represented as an artist's entity
-     * @return ResponseEntity<List < Artist>> a list of books.
+     * @return Flux<List < ?>> flux merged list of books and albums.
      */
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/search/artist", consumes = MediaType.ALL_VALUE, produces =
             MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseStatus(HttpStatus.OK)
     public Flux<List<?>> getTopBooksAndAlbums(@NonNull @RequestParam("name") final String artist,
             @Nullable @RequestParam(value = "limit", required = false) final Integer limit) {
         return artistService.getTopBooksAndAlbums(artist, Objects.isNull(limit) ? 5 : limit);
