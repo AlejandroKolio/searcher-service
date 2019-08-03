@@ -20,13 +20,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  _embedded:
-                    type: object
-                    properties:
-                      content:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/Artist"
+                  Artist:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Artist"
         400:
           description: |
             - code 100
