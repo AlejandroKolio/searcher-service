@@ -21,6 +21,7 @@ import reactor.core.scheduler.Schedulers;
 @RequiredArgsConstructor
 public class ArtistService {
 
+    public static final int MAX_WAIT_INTERVAL = 60;
     @NonNull
     private final GoogleClient googleClient;
     @NonNull
@@ -38,7 +39,7 @@ public class ArtistService {
         return appleClient.getData(input)
                 .map(str -> albumService.getTopAlbums(str, limit))
                 .onErrorResume(error -> Mono.empty())
-                .take(Duration.ofSeconds(10))
+                .take(Duration.ofSeconds(MAX_WAIT_INTERVAL))
                 .log()
                 .subscribeOn(Schedulers.elastic());
     }
@@ -47,7 +48,7 @@ public class ArtistService {
         return googleClient.getData(input)
                 .map(str -> bookService.getTopBooks(str, limit))
                 .onErrorResume(error -> Mono.empty())
-                .take(Duration.ofSeconds(10))
+                .take(Duration.ofSeconds(MAX_WAIT_INTERVAL))
                 .log()
                 .subscribeOn(Schedulers.elastic());
     }
