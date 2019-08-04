@@ -2,7 +2,7 @@
 
 Is a service, that will accept a request with text parameter on input.
 
-It will return maximum of 5 books and maximum of 5 albums (by default if there is no any limit give in path)
+It will return maximum of 5 books and maximum of 5 albums (**by default if there is no any limit given explisitly**)
 that are related to the input term. The response
 elements will only contain title, authors(/artists) and information whether a book or an album
 ###### documentation can be found in resources/openapi.yml.
