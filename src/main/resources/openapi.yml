@@ -65,11 +65,11 @@ components:
   schemas:
     Artist:
       properties:
-        book:
+        Book:
           type: object
           description: top limited books
           $ref: "#/components/schemas/Book"
-        album:
+        Album:
           type: object
           description: top limited albums
           $ref: "#/components/schemas/Album"
