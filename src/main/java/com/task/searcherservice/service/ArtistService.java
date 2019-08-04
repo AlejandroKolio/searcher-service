@@ -33,7 +33,8 @@ public class ArtistService {
     private final BookService bookService;
 
     public Flux<List<?>> getTopBooksAndAlbums(@NonNull String input, @Nullable Integer limit) {
-        return Flux.merge(monoAlbums(input, limit), monoBooks(input, limit));
+        return Flux.merge(monoAlbums(input, limit), monoBooks(input, limit))
+                .subscribeOn(Schedulers.elastic());
     }
 
     private Mono<List<Album>> monoAlbums(@NonNull String input, @Nullable Integer limit) {
