@@ -1,4 +1,4 @@
-package com.task.searcherservice.controller.error;
+package com.task.searcherservice.controller.exceptionhandler.errorresponse;
 
 import com.devskiller.friendly_id.FriendlyId;
 import lombok.AccessLevel;
@@ -10,7 +10,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * General DTO for error response.
  * @author Alexander Shakhov
  */
 @Getter

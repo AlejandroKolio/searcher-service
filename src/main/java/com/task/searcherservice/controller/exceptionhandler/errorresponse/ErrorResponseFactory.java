@@ -1,4 +1,4 @@
-package com.task.searcherservice.controller.error;
+package com.task.searcherservice.controller.exceptionhandler.errorresponse;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -14,6 +14,11 @@ public class ErrorResponseFactory {
 
     @NonNull
     public ErrorResponse create(@NonNull HttpStatus status, @NonNull ErrorCodes errorCode, @NonNull String message) {
-        return new ErrorResponse(status.value(), errorCode.getCode(), message);
+        return new ErrorResponse(status.value(), errorCode.getMessage(), message);
+    }
+
+    @NonNull
+    public ErrorResponse create(@NonNull ErrorCodes errorCode, @NonNull String message) {
+        return create(errorCode.getStatus(), errorCode, message);
     }
 }

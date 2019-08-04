@@ -30,6 +30,6 @@ public class AlbumServiceTest {
     @Description("Should throw FieldNotFoundException if field has been changed by 3d party")
     public void getTopAlbumsResourseNotFoundExceptionTest() {
         assertThatThrownBy(() -> albumService.getTopAlbums(wrongFormatOrAbsentField, 10)).isInstanceOf(
-                FieldNotFoundException.class).hasMessageContaining("Field not found.");
+                FieldNotFoundException.class).hasMessageContaining("field format is changed or not found");
     }
 }

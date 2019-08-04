@@ -4,6 +4,7 @@ import com.task.searcherservice.client.AppleClient;
 import com.task.searcherservice.client.GoogleClient;
 import com.task.searcherservice.dto.Album;
 import com.task.searcherservice.dto.Book;
+import com.task.searcherservice.exception.RemoteServiceException;
 import java.time.Duration;
 import java.util.List;
 import lombok.NonNull;
@@ -38,6 +39,9 @@ public class ArtistService {
     private Mono<List<Album>> monoAlbums(@NonNull String input, @Nullable Integer limit) {
         return appleClient.getData(input)
                 .map(str -> albumService.getTopAlbums(str, limit))
+                .doOnError(error -> {
+                    throw new RemoteServiceException(null, error.getMessage());
+                })
                 .onErrorResume(error -> Mono.empty())
                 .take(Duration.ofSeconds(MAX_WAIT_INTERVAL))
                 .log()
@@ -47,6 +51,9 @@ public class ArtistService {
     private Mono<List<Book>> monoBooks(@NonNull String input, @Nullable Integer limit) {
         return googleClient.getData(input)
                 .map(str -> bookService.getTopBooks(str, limit))
+                .doOnError(error -> {
+                    throw new RemoteServiceException(null, error.getMessage());
+                })
                 .onErrorResume(error -> Mono.empty())
                 .take(Duration.ofSeconds(MAX_WAIT_INTERVAL))
                 .log()

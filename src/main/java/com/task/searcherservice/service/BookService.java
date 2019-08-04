@@ -41,7 +41,7 @@ public class BookService {
         try {
             return Optional.ofNullable(mapper.readValue(body, SearchResponse.class).getItems())
                     .orElseThrow(
-                            () -> new FieldNotFoundException("field format is changed or not found", "[getItems()]"))
+                            () -> new FieldNotFoundException("field format is changed or not found"))
                     .stream()
                     .map(Item::getVolumeInfo)
                     .map(Item.VolumeInfo::getTitle)
