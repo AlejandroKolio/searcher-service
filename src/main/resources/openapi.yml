@@ -31,9 +31,9 @@ paths:
                       $ref: "#/components/schemas/Artist"
         400:
           description: |
-            - code 100
-              - Description: request is invalid
-            - code 101
+            - code Wrong format input.
+              - Description: bad request
+            - code Resourse is unknown or not found.
               - Description: resourse not found
           content:
             application/json:
