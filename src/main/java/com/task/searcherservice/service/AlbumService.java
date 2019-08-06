@@ -40,7 +40,8 @@ public class AlbumService {
     public List<Album> getTopAlbums(@NonNull String body, @Nullable Integer limit) {
         try {
             return Optional.ofNullable(mapper.readValue(body, SearchResponse.class).getResults())
-                    .orElseThrow(() -> new FieldNotFoundException("field format is changed or not found"))
+                    .orElseThrow(
+                            () -> new FieldNotFoundException("field format is changed or not found"))
                     .stream()
                     .map(Sku::getCollectionName)
                     .filter(Objects::nonNull)

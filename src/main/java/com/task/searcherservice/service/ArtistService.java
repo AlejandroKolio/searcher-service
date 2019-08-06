@@ -34,6 +34,8 @@ public class ArtistService {
 
     public Flux<List<?>> getTopBooksAndAlbums(@NonNull String input, @Nullable Integer limit) {
         return Flux.merge(monoAlbums(input, limit), monoBooks(input, limit))
+                .metrics()
+                .log()
                 .subscribeOn(Schedulers.elastic());
     }
 
@@ -45,6 +47,7 @@ public class ArtistService {
                 })
                 .onErrorResume(error -> Mono.empty())
                 .take(Duration.ofSeconds(MAX_WAIT_INTERVAL))
+                .metrics()
                 .log()
                 .subscribeOn(Schedulers.elastic());
     }
@@ -57,6 +60,7 @@ public class ArtistService {
                 })
                 .onErrorResume(error -> Mono.empty())
                 .take(Duration.ofSeconds(MAX_WAIT_INTERVAL))
+                .metrics()
                 .log()
                 .subscribeOn(Schedulers.elastic());
     }

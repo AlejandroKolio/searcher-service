@@ -23,7 +23,7 @@ import org.springframework.web.servlet.ModelAndView;
 @AllArgsConstructor
 public class DefaultExceptionResolver implements HandlerExceptionResolver {
     @NonNull
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper mapper;
     @NonNull
     private final ErrorResponseFactory errorResponseFactory;
 
@@ -36,7 +36,7 @@ public class DefaultExceptionResolver implements HandlerExceptionResolver {
         log.error("{}", errorResponse, exception);
         response.setStatus(code.getStatus().value());
         try (final OutputStream outputStream = response.getOutputStream()) {
-            objectMapper.writeValue(outputStream, errorResponse);
+            mapper.writeValue(outputStream, errorResponse);
         } catch (IOException e) {
             log.error("exception while writing response", e);
         }
