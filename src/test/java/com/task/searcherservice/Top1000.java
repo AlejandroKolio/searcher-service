@@ -1,15 +1,16 @@
 package com.task.searcherservice;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,26 +26,32 @@ public class Top1000 {
     @Getter
     private final PriorityBlockingQueue<Integer> queue;
     private CountDownLatch count;
+    private final ReentrantReadWriteLock.WriteLock lock;
     private final int capacity;
 
     public Top1000(int capacity) {
         this.capacity = capacity;
         queue = new PriorityBlockingQueue<>(capacity);
         count = new CountDownLatch(capacity);
+        lock = new ReentrantReadWriteLock().writeLock();
     }
 
     /**
      * Would be called in case of incoming element. One incoming element would be passed as argument
      */
-    public void onEvent(final Integer element) {
-        if (queue.size() != capacity) {
-            log.info(String.format("Capacity left:  |%10d|\n", queue.size()));
-            log.info("------------------------");
-            queue.put(element);
-            count.countDown();
-        } else {
-            getTop();
-            count.countDown();
+    public synchronized void onEvent(final Integer element) {
+        try {
+            lock.lock();
+            if (queue.size() != capacity) {
+                log.info(String.format("Put element to queue:  |%10d| capacity %2d|", element, queue.size()));
+                queue.put(element);
+                count.countDown();
+            } else {
+                getTop();
+                count.countDown();
+            }
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -53,28 +60,25 @@ public class Top1000 {
      */
     public List<Integer> getTop() {
         try {
-            log.info("Not ready yet. Queue is {} size:", count.getCount());
             count.await();
+            log.debug("Waiting for collection to be full...");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        log.info("Now ready...");
-        final List<Integer> list = queue.stream()
-                .sorted(Comparator.reverseOrder())
+        final CopyOnWriteArrayList<Integer> list = new CopyOnWriteArrayList<>();
+        queue.drainTo(list);
+        log.debug(String.format("Clean up queue     \t%s", queue.toString()));
+        count = new CountDownLatch(0);
+        log.warn(String.format("List is full:       \t%s", list.toString()));
+        return list.stream()
+                .sorted(Comparator.naturalOrder())
                 .distinct()
                 .limit(capacity)
-                .collect(toList());
-        queue.drainTo(list);
-        count = new CountDownLatch(0);
-        log.info("Rest count down: {}", count.getCount());
-        log.info("------------------");
-        log.info("| Top 1000: {}", list.toString());
-        log.info("------------------");
-        return list;
+                .collect(Collectors.toUnmodifiableList());
     }
 
     public static void main(String[] args) throws InterruptedException {
-        final ExecutorService executor = Executors.newFixedThreadPool(20);
+        final ExecutorService executor = Executors.newFixedThreadPool(10);
         final int capacity = 10;
         final Top1000 top1000 = new Top1000(capacity);
 
@@ -82,7 +86,6 @@ public class Top1000 {
             while (true) {
                 final int producedElement = ThreadLocalRandom.current().nextInt(100);
                 try {
-                    log.info(String.format("Put into queue: |%10d| ", producedElement));
                     Thread.sleep(1000);
                     top1000.onEvent(producedElement);
                 } catch (InterruptedException ex) {
@@ -93,8 +96,6 @@ public class Top1000 {
 
         final Runnable consumer = () -> {
             try {
-                log.info(String.format("Retrieving top %d out of the queue size |%20d|", capacity,
-                        top1000.getQueue().size()));
                 top1000.getTop();
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
