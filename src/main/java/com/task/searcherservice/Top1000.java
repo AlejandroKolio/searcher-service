@@ -71,7 +71,7 @@ public class Top1000<T extends Number> {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        final int capacity = 10;
+        final int capacity = 1000;
         final ExecutorService executor = Executors.newCachedThreadPool();
 
         final Top1000<Integer> top1000 = new Top1000<>(capacity);
