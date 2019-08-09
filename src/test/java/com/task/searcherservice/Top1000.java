@@ -1,6 +1,5 @@
 package com.task.searcherservice;
 
-import java.util.Comparator;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
@@ -11,20 +10,17 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Alexander Shakhov
+ *
+ *         Generified class which must return 1000 elements strickly and wait for collection to be full otherwise.
  */
 @Slf4j
-public class Top1000 {
+public class Top1000<T extends Number> {
 
-    //done: 1 must return 1000 elements strickly wait otherwise.
-    //todo: generify
-
-    @Getter
-    private final PriorityBlockingQueue<Integer> queue;
+    private final PriorityBlockingQueue<T> queue;
     private CountDownLatch count;
     private final ReentrantReadWriteLock.WriteLock lock;
     private final int capacity;
@@ -39,11 +35,12 @@ public class Top1000 {
     /**
      * Would be called in case of incoming element. One incoming element would be passed as argument
      */
-    public synchronized void onEvent(final Integer element) {
+    public synchronized void onEvent(final T element) {
         try {
             lock.lock();
             if (queue.size() != capacity) {
-                log.info(String.format("Put element to queue:  |%10d| capacity %2d|", element, queue.size()));
+                log.info(
+                        String.format("Put element to queue:  |%10s| capacity %2d|", element.toString(), queue.size()));
                 queue.put(element);
                 count.countDown();
             } else {
@@ -58,35 +55,33 @@ public class Top1000 {
     /**
      * Returns top (with maximum value) 1000 elements. Could be called anytime.
      */
-    public Set<Integer> getTop() {
+    public Set<T> getTop() {
         try {
             count.await();
             log.debug("Waiting for collection to be full...");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        final Set<Integer> list = new CopyOnWriteArraySet<>();
+        final Set<T> list = new CopyOnWriteArraySet<>();
         queue.drainTo(list);
-        log.debug(String.format("Clean up queue     \t%s", queue.toString()));
+        log.debug(String.format("Clean up queue: %8s", queue.toString()));
         count = new CountDownLatch(0);
-        log.warn(String.format("List is full:       \t%s", list.toString()));
-        return list.stream()
-                .sorted(Comparator.naturalOrder())
-                .distinct()
-                .limit(capacity)
-                .collect(Collectors.toUnmodifiableSet());
+        log.warn(String.format("List is full: %20s", list.toString()));
+        return list.stream().sorted().distinct().limit(capacity).collect(Collectors.toUnmodifiableSet());
     }
 
     public static void main(String[] args) throws InterruptedException {
-        final ExecutorService executor = Executors.newFixedThreadPool(10);
-        final int capacity = 1000;
-        final Top1000 top1000 = new Top1000(capacity);
+        final int capacity = 10;
+        final ExecutorService executor = Executors.newCachedThreadPool();
+
+        final Top1000<Integer> top1000 = new Top1000<>(capacity);
 
         final Runnable producer = () -> {
             while (true) {
                 final int producedElement = ThreadLocalRandom.current().nextInt(10000);
                 try {
-                    Thread.sleep(1);
+                    // Sleep is for visualizing purposes only.
+                    Thread.sleep(500);
                     top1000.onEvent(producedElement);
                 } catch (InterruptedException ex) {
                     ex.printStackTrace();
@@ -96,8 +91,9 @@ public class Top1000 {
 
         final Runnable consumer = () -> {
             try {
+                // Sleep is for visualizing purposes only.
+                Thread.sleep(500);
                 top1000.getTop();
-                Thread.sleep(1);
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
